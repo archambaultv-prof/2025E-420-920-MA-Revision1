@@ -1,4 +1,4 @@
-import piledger.main as piledger
+from . import main as piledger
 
 def main() -> None:
     piledger.main()

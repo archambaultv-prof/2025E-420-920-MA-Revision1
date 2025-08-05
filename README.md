@@ -27,17 +27,17 @@ Dans un premier temps, vous devez comprendre le code existant. Voici les étapes
 Ensuite, vous devez l'améliorer en suivant les consignes ci-dessous. Vous pouvez
 faire ces améliorations dans l'ordre que vous souhaitez.
 
-- Répartir le code en plusieurs modules pour améliorer la lisibilité.
+- Répartir le code en plusieurs modules pour améliorer la lisibilité. * sur possible de plus diviser *
 - Ajouter des commentaires et des docstrings pour expliquer le code.
 - Utiliser les bonnes structures de données (set, dict, list).
-- Utiliser des classes pour représenter les concepts principaux (par exemple, une
-  classe `Transaction` pour représenter une transaction financière) au lieu
+- Utiliser des classes pour représenter les concepts principaux (par exemple, une     *  * + Account  *
+  classe `Transaction` pour représenter une transaction financière) au lieu  
   d'utiliser des dictionnaires.
 - Utiliser des exceptions pour gérer les erreurs (par exemple, lors de la lecture
   d'un fichier).
-- Améliorer la lecture du fichier CSV en utilisant le module `csv` de la bibliothèque
+- Améliorer la lecture du fichier CSV en utilisant le module `csv` de la bibliothèque *
   standard. Même chose pour l'exportation des écritures d'un compte.
-- Simplifier les boucles et les conditions pour les rendre plus lisibles.
+- Simplifier les boucles et les conditions pour les rendre plus lisibles. *
 - Ajouter les annotations de types.
 - Tout autre amélioration que vous jugez pertinente.
 
