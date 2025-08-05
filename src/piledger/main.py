@@ -1,105 +1,9 @@
 import os
+from piledger.data_handler import read_data_file, export_account_postings
+from piledger.transactions import display_all_transactions, display_transactions_by_account, get_transactions_by_date_range
+from piledger.accounts import calculate_balance, get_all_accounts, validate_account_name
 
-def read_data_file():
-    data = []
-    file = open('data.csv', 'r', encoding='utf-8')
-    lines = file.readlines()
-    file.close()
-    
-    i = 0
-    while i < len(lines):
-        if i == 0:
-            i += 1
-            continue
-        line = lines[i].strip()
-        if line:
-            parts = []
-            current_part = ""
-            in_quotes = False
-            j = 0
-            while j < len(line):
-                char = line[j]
-                if char == '"':
-                    in_quotes = not in_quotes
-                elif char == ',' and not in_quotes:
-                    parts.append(current_part)
-                    current_part = ""
-                    j += 1
-                    continue
-                current_part += char
-                j += 1
-            parts.append(current_part)
-            
-            if len(parts) >= 5:
-                txn_dict = {}
-                txn_dict['no_txn'] = int(parts[0])
-                txn_dict['date'] = parts[1]
-                txn_dict['compte'] = parts[2]
-                txn_dict['montant'] = float(parts[3])
-                txn_dict['commentaire'] = parts[4]
-                data.append(txn_dict)
-        i += 1
-    
-    return data
 
-def calculate_balance(data, account_name):
-    balance = 0.0
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == account_name:
-            balance += transaction['montant']
-        i += 1
-    return balance
-
-def get_all_accounts(data):
-    accounts = []
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        account = transaction['compte']
-        found = False
-        j = 0
-        while j < len(accounts):
-            if accounts[j] == account:
-                found = True
-                break
-            j += 1
-        if not found:
-            accounts.append(account)
-        i += 1
-    return accounts
-
-def display_all_transactions(data):
-    print("\n=== TOUTES LES TRANSACTIONS ===")
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        print(f"Transaction {transaction['no_txn']} - {transaction['date']}")
-        print(f"  Compte: {transaction['compte']}")
-        print(f"  Montant: {transaction['montant']:.2f}$")
-        if transaction['commentaire']:
-            print(f"  Commentaire: {transaction['commentaire']}")
-        print()
-        i += 1
-
-def display_transactions_by_account(data, account_name):
-    print(f"\n=== TRANSACTIONS POUR LE COMPTE '{account_name}' ===")
-    found_any = False
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == account_name:
-            found_any = True
-            print(f"Transaction {transaction['no_txn']} - {transaction['date']}")
-            print(f"  Montant: {transaction['montant']:.2f}$")
-            if transaction['commentaire']:
-                print(f"  Commentaire: {transaction['commentaire']}")
-            print()
-        i += 1
-    
-    if not found_any:
-        print(f"Aucune transaction trouvée pour le compte '{account_name}'")
 
 def display_summary(data):
     print("\n=== RÉSUMÉ DES COMPTES ===")
@@ -111,15 +15,6 @@ def display_summary(data):
         print(f"{account}: {balance:.2f}$")
         i += 1
 
-def get_transactions_by_date_range(data, start_date, end_date):
-    filtered_transactions = []
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if start_date <= transaction['date'] <= end_date:
-            filtered_transactions.append(transaction)
-        i += 1
-    return filtered_transactions
 
 def find_largest_expense(data):
     largest_expense = None
@@ -153,26 +48,7 @@ def find_total_expenses(data):
         i += 1
     return total
 
-def export_account_postings(data, account_name, filename):
-    file = open(filename, 'w', encoding='utf-8')
-    file.write("No txn,Date,Compte,Montant,Commentaire\n")
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == account_name:
-            line = f"{transaction['no_txn']},{transaction['date']},{transaction['compte']},{transaction['montant']},{transaction['commentaire']}\n"
-            file.write(line)
-        i += 1
-    file.close()
-    print(f"Écritures exportées vers {filename}")
 
-def validate_account_name(accounts, account_name):
-    i = 0
-    while i < len(accounts):
-        if accounts[i].lower() == account_name.lower():
-            return accounts[i]
-        i += 1
-    return None
 
 def display_menu():
     print("\n" + "="*50)
