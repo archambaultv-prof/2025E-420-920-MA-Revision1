@@ -5,15 +5,16 @@ Représente une transaction financière avec validation du montant et parsing de
 """
 
 class Transaction:
-    def __init__(self, no_txn, date, compte, montant, commentaire):
+    # Initialise une transaction en validant le montant et en transformant la date.
+    def __init__(self, no_txn: int, date: str, compte: str, montant: float, commentaire: str):
         if not isinstance(montant, (int, float)):
             raise ValueError("Le montant doit être un nombre.")
         
-        self.no_txn = no_txn
-        self.date = self._parse_date(date)
-        self.compte = compte
-        self.montant = float(montant)
-        self.commentaire = commentaire
+        self.no_txn = no_txn # Numéro de la transaction
+        self.date = self._parse_date(date) # Date de la transaction
+        self.compte = compte                # Compte associé à la transaction
+        self.montant = float(montant)      # Montant de la transaction, converti en float
+        self.commentaire = commentaire     # Commentaire optionnel sur la transaction
         
 
     def _parse_date(self, date_str):
@@ -38,7 +39,9 @@ class Transaction:
         """
         Retourne une représentation lisible de la transaction.
         """
+        # base de l'affichage
         base = f"Transaction {self.no_txn} - {self.date.date()}\n  Compte: {self.compte}\n  Montant: {self.montant:.2f}$"
+        # ajoute le commentaire s'il existe
         if self.commentaire:
             base += f"\n  Commentaire: {self.commentaire}"
         return base

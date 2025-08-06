@@ -24,15 +24,15 @@ def main():
         print("Assurez-vous que le fichier se trouve à la racine du répertoire.")
         return
     
-    data = read_data_file()
+    transaction = read_data_file() #Lecture du fichier CSV 
     
-    if len(data) == 0:
+    if not transaction:
         print("ERREUR: Aucune donnée n'a pu être chargée!")
         return
     
-    print(f"✅ {len(data)} transactions chargées avec succès!")
+    print(f"✅ {len(transaction)} transactions chargées avec succès!")
     
-    accounts = get_all_accounts(data)
+    accounts = get_all_accounts(transaction)  # Récupération de tous les comptes uniques
     
     running = True
     while running:
@@ -43,37 +43,39 @@ def main():
         except:
             print("\nAu revoir!")
             break
-        
+
+         # Gestion des choix
         if choice == "1":
-            handle_balance_inquiry(data, accounts)
+            handle_balance_inquiry(transaction, accounts)
         elif choice == "2":
-            display_all_transactions(data)
+            display_all_transactions(transaction)
+            
         elif choice == "3":
             print("\n--- Transactions par compte ---")
             print("Comptes disponibles:")
-            i = 0
-            while i < len(accounts):
-                print(f"  - {accounts[i]}")
-                i += 1
+            
+            for acc in accounts:
+                print(f" - {acc}")
             
             account_input = input("\nEntrez le nom du compte: ").strip()
             
             if account_input:
                 validated_account = validate_account_name(accounts, account_input)
                 if validated_account:
-                    display_transactions_by_account(data, validated_account)
+                    display_transactions_by_account(transaction, validated_account)
                 else:
                     print(f"Compte '{account_input}' introuvable!")
             else:
                 print("Nom de compte invalide!")
+
         elif choice == "4":
-            display_summary(data)
+            display_summary(transaction)
         elif choice == "5":
-            handle_statistics(data)
+            handle_statistics(transaction)
         elif choice == "6":
-            handle_export(data, accounts)
+            handle_export(transaction, accounts)
         elif choice == "7":
-            handle_date_search(data)
+            handle_date_search(transaction)
         elif choice == "0":
             print("\nMerci d'avoir utilisé le système de gestion comptable!")
             print("Au revoir!")

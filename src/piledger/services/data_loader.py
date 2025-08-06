@@ -15,6 +15,7 @@ def read_data_file() -> List[Transaction]:
 
             for row in reader:
                 try:
+                    # Création d'une transaction avec validation
                     txn = Transaction(
                         no_txn=int(row['No txn']),
                         date=row['Date'],
