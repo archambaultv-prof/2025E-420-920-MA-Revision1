@@ -1,0 +1,6 @@
+No txn,Date,Compte,Montant,Commentaire
+1,2023-09-01,Compte courant,1750.0,
+2,2023-09-02,Compte courant,-150.0,Achat d'épicerie
+3,2023-09-03,Compte courant,-50.0,Essence
+4,2023-09-04,Compte courant,-75.0,Cinéma
+5,2023-09-05,Compte courant,-500.0,Paiement du loyer
