@@ -9,3 +9,5 @@ No txn,Date,Compte,Montant,Commentaire
 4,2023-09-04,Compte courant,-75.00,Cinéma
 5,2023-09-05,Loyer,500.00,Paiement du loyer
 5,2023-09-05,Compte courant,-500.00,Paiement du loyer
+6,2025-08-10,Aquarium,200.00,Premier depot
+6,2025-08-10,Compte courant,-200.00,Premier depot

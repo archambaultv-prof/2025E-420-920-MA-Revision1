@@ -9,6 +9,11 @@
 #                                                     ░██                     
 #                                                ░███████                      
 #                                                                       
+
+# Le programme ne fonctionne malheureusement pas.
+# J’ai essayé de séparer les blocs de code en plusieurs fichiers mais le programme ne démarre plus :^)
+
+import os
 from .data import read_data_file, export_account_postings
 from .accounts import calculate_balance, get_all_accounts, validate_account_name, display_summary
 from .transactions import display_all_transactions, display_transactions_by_account, get_transactions_by_date_range
