@@ -1,344 +1,79 @@
-import os
+# Imports des classes et fonctions nécessaires
+from .export_management import handle_export
+from .data_handler import read_data_file
+from .account_operations import AccountManager, validate_account_name
+from .transaction_display import DisplayTransactions
+from .statistics import Statistics, handle_statistics
+from .search_operations import handle_date_search
+from .ui_manager import UIManager
+import os  # Nouvel import
 
-def read_data_file():
-    data = []
-    file = open('data.csv', 'r', encoding='utf-8')
-    lines = file.readlines()
-    file.close()
-    
-    i = 0
-    while i < len(lines):
-        if i == 0:
-            i += 1
-            continue
-        line = lines[i].strip()
-        if line:
-            parts = []
-            current_part = ""
-            in_quotes = False
-            j = 0
-            while j < len(line):
-                char = line[j]
-                if char == '"':
-                    in_quotes = not in_quotes
-                elif char == ',' and not in_quotes:
-                    parts.append(current_part)
-                    current_part = ""
-                    j += 1
-                    continue
-                current_part += char
-                j += 1
-            parts.append(current_part)
-            
-            if len(parts) >= 5:
-                txn_dict = {}
-                txn_dict['no_txn'] = int(parts[0])
-                txn_dict['date'] = parts[1]
-                txn_dict['compte'] = parts[2]
-                txn_dict['montant'] = float(parts[3])
-                txn_dict['commentaire'] = parts[4]
-                data.append(txn_dict)
-        i += 1
-    
-    return data
-
-def calculate_balance(data, account_name):
-    balance = 0.0
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == account_name:
-            balance += transaction['montant']
-        i += 1
-    return balance
-
-def get_all_accounts(data):
-    accounts = []
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        account = transaction['compte']
-        found = False
-        j = 0
-        while j < len(accounts):
-            if accounts[j] == account:
-                found = True
-                break
-            j += 1
-        if not found:
-            accounts.append(account)
-        i += 1
-    return accounts
-
-def display_all_transactions(data):
-    print("\n=== TOUTES LES TRANSACTIONS ===")
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        print(f"Transaction {transaction['no_txn']} - {transaction['date']}")
-        print(f"  Compte: {transaction['compte']}")
-        print(f"  Montant: {transaction['montant']:.2f}$")
-        if transaction['commentaire']:
-            print(f"  Commentaire: {transaction['commentaire']}")
-        print()
-        i += 1
-
-def display_transactions_by_account(data, account_name):
-    print(f"\n=== TRANSACTIONS POUR LE COMPTE '{account_name}' ===")
-    found_any = False
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == account_name:
-            found_any = True
-            print(f"Transaction {transaction['no_txn']} - {transaction['date']}")
-            print(f"  Montant: {transaction['montant']:.2f}$")
-            if transaction['commentaire']:
-                print(f"  Commentaire: {transaction['commentaire']}")
-            print()
-        i += 1
-    
-    if not found_any:
-        print(f"Aucune transaction trouvée pour le compte '{account_name}'")
-
-def display_summary(data):
-    print("\n=== RÉSUMÉ DES COMPTES ===")
-    accounts = get_all_accounts(data)
-    i = 0
-    while i < len(accounts):
-        account = accounts[i]
-        balance = calculate_balance(data, account)
-        print(f"{account}: {balance:.2f}$")
-        i += 1
-
-def get_transactions_by_date_range(data, start_date, end_date):
-    filtered_transactions = []
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if start_date <= transaction['date'] <= end_date:
-            filtered_transactions.append(transaction)
-        i += 1
-    return filtered_transactions
-
-def find_largest_expense(data):
-    largest_expense = None
-    max_amount = 0
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['montant'] > max_amount and transaction['compte'] != 'Compte courant' and transaction['compte'] != 'Revenu':
-            max_amount = transaction['montant']
-            largest_expense = transaction
-        i += 1
-    return largest_expense
-
-def find_total_income(data):
-    total = 0
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == 'Revenu':
-            total += abs(transaction['montant'])
-        i += 1
-    return total
-
-def find_total_expenses(data):
-    total = 0
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] != 'Compte courant' and transaction['compte'] != 'Revenu' and transaction['montant'] > 0:
-            total += transaction['montant']
-        i += 1
-    return total
-
-def export_account_postings(data, account_name, filename):
-    file = open(filename, 'w', encoding='utf-8')
-    file.write("No txn,Date,Compte,Montant,Commentaire\n")
-    i = 0
-    while i < len(data):
-        transaction = data[i]
-        if transaction['compte'] == account_name:
-            line = f"{transaction['no_txn']},{transaction['date']},{transaction['compte']},{transaction['montant']},{transaction['commentaire']}\n"
-            file.write(line)
-        i += 1
-    file.close()
-    print(f"Écritures exportées vers {filename}")
-
-def validate_account_name(accounts, account_name):
-    i = 0
-    while i < len(accounts):
-        if accounts[i].lower() == account_name.lower():
-            return accounts[i]
-        i += 1
-    return None
-
-def display_menu():
-    print("\n" + "="*50)
-    print("SYSTÈME DE GESTION COMPTABLE PERSONNEL")
-    print("="*50)
-    print("1. Afficher le solde d'un compte")
-    print("2. Afficher toutes les transactions")
-    print("3. Afficher les transactions d'un compte")
-    print("4. Afficher le résumé de tous les comptes")
-    print("5. Afficher les statistiques")
-    print("6. Exporter les écritures d'un compte")
-    print("7. Rechercher par période")
-    print("0. Quitter")
-    print("="*50)
-
-def handle_balance_inquiry(data, accounts):
-    print("\n--- Consultation de solde ---")
-    print("Comptes disponibles:")
-    i = 0
-    while i < len(accounts):
-        print(f"  - {accounts[i]}")
-        i += 1
-    
-    account_input = input("\nEntrez le nom du compte: ").strip()
-    
-    if not account_input:
-        print("Nom de compte invalide!")
-        return
-    
-    validated_account = validate_account_name(accounts, account_input)
-    
-    if validated_account:
-        balance = calculate_balance(data, validated_account)
-        print(f"\nSolde du compte '{validated_account}': {balance:.2f}$")
-        
-    else:
-        print(f"Compte '{account_input}' introuvable!")
-        print("Vérifiez l'orthographe ou choisissez un compte dans la liste.")
-
-def handle_statistics(data):
-    print("\n=== STATISTIQUES FINANCIÈRES ===")
-    
-    total_income = find_total_income(data)
-    total_expenses = find_total_expenses(data)
-    net_worth = total_income - total_expenses
-    
-    print(f"Revenus totaux: {total_income:.2f}$")
-    print(f"Dépenses totales: {total_expenses:.2f}$")
-    print(f"Situation nette: {net_worth:.2f}$")
-    
-    if net_worth > 0:
-        print("📈 Situation financière positive")
-    elif net_worth < 0:
-        print("📉 Situation financière négative")
-    else:
-        print("⚖️  Situation financière équilibrée")
-    
-    largest_expense = find_largest_expense(data)
-    if largest_expense:
-        print(f"\nPlus grosse dépense: {largest_expense['montant']:.2f}$ ({largest_expense['compte']})")
-        if largest_expense['commentaire']:
-            print(f"Commentaire: {largest_expense['commentaire']}")
-    
-    current_account_balance = calculate_balance(data, 'Compte courant')
-    print(f"\nSolde du compte courant: {current_account_balance:.2f}$")
-
-def handle_date_search(data):
-    print("\n--- Recherche par période ---")
-    start_date = input("Date de début (YYYY-MM-DD): ").strip()
-    end_date = input("Date de fin (YYYY-MM-DD): ").strip()
-    
-    if not start_date or not end_date:
-        print("Dates invalides!")
-        return
-    
-    filtered_data = get_transactions_by_date_range(data, start_date, end_date)
-    
-    if len(filtered_data) == 0:
-        print(f"Aucune transaction trouvée entre {start_date} et {end_date}")
-    else:
-        print(f"\n{len(filtered_data)} écritures(s) trouvée(s) entre {start_date} et {end_date}:")
-        i = 0
-        while i < len(filtered_data):
-            transaction = filtered_data[i]
-            print(f"  {transaction['date']} - {transaction['compte']}: {transaction['montant']:.2f}$")
-            i += 1
-
-def handle_export(data, accounts):
-    print("\n--- Exportation ---")
-    print("Comptes disponibles:")
-    i = 0
-    while i < len(accounts):
-        print(f"  - {accounts[i]}")
-        i += 1
-    
-    account_input = input("\nEntrez le nom du compte à exporter: ").strip()
-    
-    if not account_input:
-        print("Nom de compte invalide!")
-        return
-    
-    validated_account = validate_account_name(accounts, account_input)
-    
-    if validated_account:
-        filename = input("Nom du fichier de sortie (ex: export.csv): ").strip()
-        if not filename:
-            filename = f"export_{validated_account.replace(' ', '_').lower()}.csv"
-        
-        export_account_postings(data, validated_account, filename)
-    else:
-        print(f"Compte '{account_input}' introuvable!")
-
-def main():
+def main(): 
     print("Chargement des données...")
+    print(f"Répertoire de travail actuel: {os.getcwd()}")  # Ajouter import os en haut
     
-    if not os.path.exists('data.csv'):
-        print("ERREUR: Le fichier data.csv est introuvable!")
-        print("Assurez-vous que le fichier se trouve à la racine du répertoire.")
+    try:
+        data = read_data_file()
+        print(f"Debug - Type de data: {type(data)}")
+        print(f"Debug - Valeur de data: {data}")
+    except Exception as e:
+        print(f"Erreur lors du chargement: {e}")
         return
     
-    data = read_data_file()
-    
-    if len(data) == 0:
-        print("ERREUR: Aucune donnée n'a pu être chargée!")
+    # ✅ Créer les instances une seule fois
+    account_manager = AccountManager(data)
+    display_manager = DisplayTransactions(data)
+    stats_manager = Statistics(data)
+
+    # Add null checks and error handling
+    if data is None:
+        print("❌ Erreur: Aucune donnée chargée!")
         return
-    
+
+    accounts = account_manager.get_all_accounts()
+    if accounts is None:
+        print("❌ Erreur: Impossible de récupérer les comptes!")
+        accounts = []  # Fallback to empty list
+
     print(f"✅ {len(data)} transactions chargées avec succès!")
-    
-    accounts = get_all_accounts(data)
+    print(f"✅ {len(accounts)} comptes détectés: {', '.join(accounts) if accounts else 'Aucun'}")
     
     running = True
     while running:
-        display_menu()
+        UIManager(data).display_menu()
         
         try:
             choice = input("\nVotre choix: ").strip()
-        except:
+        except KeyboardInterrupt:
             print("\nAu revoir!")
             break
         
         if choice == "1":
-            handle_balance_inquiry(data, accounts)
+            # ✅ Utiliser la fonction optimisée
+            handle_balance_inquiry_optimized(account_manager, accounts)
         elif choice == "2":
-            display_all_transactions(data)
+            display_manager.display_all_transactions()
         elif choice == "3":
             print("\n--- Transactions par compte ---")
             print("Comptes disponibles:")
-            i = 0
-            while i < len(accounts):
-                print(f"  - {accounts[i]}")
-                i += 1
+            for account in accounts:  
+                print(f"  - {account}")
             
             account_input = input("\nEntrez le nom du compte: ").strip()
             
             if account_input:
                 validated_account = validate_account_name(accounts, account_input)
                 if validated_account:
-                    display_transactions_by_account(data, validated_account)
+                    display_manager.display_transactions_by_account(validated_account)
                 else:
                     print(f"Compte '{account_input}' introuvable!")
             else:
                 print("Nom de compte invalide!")
         elif choice == "4":
-            display_summary(data)
+            display_manager.display_summary()
         elif choice == "5":
-            handle_statistics(data)
+            # ✅ Corriger les paramètres de handle_statistics
+            handle_statistics(data)  # Cette fonction n'attend qu'un seul paramètre
         elif choice == "6":
             handle_export(data, accounts)
         elif choice == "7":
@@ -352,6 +87,28 @@ def main():
         
         if running and choice != "0":
             input("\nAppuyez sur Entrée pour continuer...")
+
+def handle_balance_inquiry_optimized(account_manager, accounts):
+    """Version optimisée qui reçoit l'instance AccountManager"""
+    print("\n--- Consultation de solde ---")
+    print("Comptes disponibles:")
+    for account in accounts:
+        print(f"  - {account}")
+
+    account_input = input("\nEntrez le nom du compte: ").strip()
+    
+    if not account_input:
+        print("Nom de compte invalide!")
+        return
+    
+    validated_account = validate_account_name(accounts, account_input)
+    
+    if validated_account:
+        balance = account_manager.calculate_balance(validated_account)
+        print(f"\nSolde du compte '{validated_account}': {balance:.2f}$")
+    else:
+        print(f"Compte '{account_input}' introuvable!")
+        print("Vérifiez l'orthographe ou choisissez un compte dans la liste.")
 
 if __name__ == "__main__":
     main()
