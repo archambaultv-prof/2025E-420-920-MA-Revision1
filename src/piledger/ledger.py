@@ -27,3 +27,6 @@ class Ledger:
         Retourne toutes les transactions d'un compte.
         """
         return [txn for txn in self.transactions if txn.compte == compte]
+
+    def toto(self) -> None:
+        pass
